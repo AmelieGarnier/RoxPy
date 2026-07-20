@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;overflow:hidden;background:#0a1020;font-family:'Poppins',system-ui,sans-serif}
+a{color:#F6B73C}a:hover{color:#FF7A00}
+@keyframes nodePulse{0%,100%{box-shadow:0 0 0 0 rgba(246,183,60,.55),0 0 22px rgba(246,183,60,.5)}50%{box-shadow:0 0 0 14px rgba(246,183,60,0),0 0 34px rgba(246,183,60,.75)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes chestBounce{0%,88%,100%{transform:translateY(0)}92%{transform:translateY(-5px)}96%{transform:translateY(1px)}}
+@keyframes zoneIn{from{opacity:0;transform:scale(1.06)}to{opacity:1;transform:scale(1)}}
+</style>
+</helmet>
+
+<div data-screen-label="Carte du monde" style="position:fixed;inset:0;display:flex;flex-direction:column;background:radial-gradient(circle at 50% 0%, #16223c, #0a1020 70%)">
+
+  <!-- ═══════ HEADER ROXPY ═══════ -->
+  <header style="display:flex;align-items:center;gap:12px;padding:10px 18px;background:rgba(10,16,32,.92);border-bottom:1px solid rgba(246,183,60,.22);flex-wrap:wrap;z-index:30">
+    <a href="RoxPy.dc.html" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid #FF7A00;box-shadow:0 0 14px rgba(255,122,0,.45)"><img src="assets/fox1.png" alt="RoxPy" style="width:100%;height:100%;object-fit:cover;object-position:50% 12%"></div>
+      <div>
+        <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;line-height:1;color:#fff">Rox<span style="color:#FF7A00">Py</span></div>
+        <div style="font-size:8.5px;font-weight:700;letter-spacing:.14em;color:#8d9bb5">APPRENDS · PROGRESSE · ÉVOLUE</div>
+      </div>
+    </a>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(246,183,60,.3);border-radius:99px;padding:8px 15px;font-size:12.5px;font-weight:800;color:#f2e8d5">🔥 Série : {{streak}} j</span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(246,183,60,.3);border-radius:99px;padding:8px 15px;font-size:12.5px;font-weight:800;color:#f2e8d5">🌿 Niveau {{level}}</span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(246,183,60,.3);border-radius:99px;padding:8px 15px;font-size:12.5px;font-weight:800;color:#f2e8d5">⭐ XP {{xp}}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <a href="RoxPy.dc.html#missions" style="text-decoration:none;color:#d7dfec;font-size:12.5px;font-weight:700;padding:8px 12px;border-radius:10px" style-hover="background:rgba(255,255,255,.08);color:#F6B73C">🚩 Missions</a>
+      <a href="RoxPy.dc.html#inventaire" style="text-decoration:none;color:#d7dfec;font-size:12.5px;font-weight:700;padding:8px 12px;border-radius:10px" style-hover="background:rgba(255,255,255,.08);color:#F6B73C">🎒 Inventaire</a>
+      <a href="RoxPy Monde 2.5D.dc.html" style="text-decoration:none;color:#d7dfec;font-size:12.5px;font-weight:700;padding:8px 12px;border-radius:10px" style-hover="background:rgba(255,255,255,.08);color:#F6B73C">🌄 Monde vivant</a>
+
+    </div>
+  </header>
+
+  <!-- ═══════ SCÈNE CARTE ═══════ -->
+  <div style="position:relative;flex:1;min-height:0;display:grid;place-items:center;padding:12px 14px">
+
+    <div style="{{mapBoxStyle}}">
+      <img ref="{{mapRef}}" src="assets/maps/world-map.png" alt="{{mapAlt}}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:18px"></img>
+
+      <!-- halo du node actuel -->
+      <div style="{{haloStyle}}"></div>
+
+      <!-- sentier pointillé vers les nouvelles zones -->
+      <sc-for list="{{trailDots}}" as="td" hint-placeholder-count="0">
+        <span style="{{td.style}}"></span>
+      </sc-for>
+
+      <!-- nodes (pastilles dessinées par-dessus la carte) -->
+      <sc-for list="{{nodes}}" as="n" hint-placeholder-count="8">
+        <button onClick="{{n.onClick}}" title="{{n.title}}" style="{{n.style}}" style-hover="{{n.hoverStyle}}">{{n.label}}</button>
+      </sc-for>
+
+      <!-- hotspots de régions (vue monde) -->
+      <sc-for list="{{regionSpots}}" as="r" hint-placeholder-count="0">
+        <button onClick="{{r.onClick}}" title="{{r.title}}" style="{{r.style}}" style-hover="outline:2px solid rgba(246,183,60,.65);background:rgba(246,183,60,.1)"></button>
+      </sc-for>
+
+      <!-- particules -->
+      <canvas ref="{{fxRef}}" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;border-radius:18px"></canvas>
+
+      <!-- retour à la carte du monde -->
+      <sc-if value="{{inZone}}" hint-placeholder-val="{{false}}">
+        <button onClick="{{onBackWorld}}" style="position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:8px;background:rgba(10,16,32,.78);border:1px solid rgba(246,183,60,.5);color:#f2e8d5;border-radius:99px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;backdrop-filter:blur(4px)" style-hover="background:rgba(246,183,60,.25)">🗺️ Carte du monde</button>
+      </sc-if>
+    </div>
+
+    <!-- panneau de détail d'un node -->
+    <sc-if value="{{detailOn}}" hint-placeholder-val="{{false}}">
+      <div style="position:absolute;inset:0;display:grid;place-items:center;background:rgba(6,10,20,.55);backdrop-filter:blur(3px);z-index:20" onClick="{{onCloseDetail}}">
+        <div style="width:340px;background:linear-gradient(180deg,#141d33,#0d1424);border:1px solid rgba(246,183,60,.4);border-radius:20px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.55);animation:popIn .22s ease;text-align:center" onClick="{{stopProp}}">
+          <div style="width:64px;height:64px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;font-size:28px;background:{{dBg}};border:2.5px solid {{dColor}};box-shadow:0 0 22px {{dGlow}}">{{dIcone}}</div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:{{dColor}}">{{dRegion}}</div>
+          <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;color:#fff;margin:2px 0 6px">Zone {{dId}} · {{dTitre}}</div>
+          <div style="font-size:12.5px;font-weight:700;color:#9fb0c8;margin-bottom:14px">{{dStatus}}</div>
+          <div style="display:flex;gap:10px;justify-content:center">
+            <button onClick="{{onCloseDetail}}" style="padding:11px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#c9d4e4;font-size:13px;font-weight:800;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Fermer</button>
+            <a href="{{dPlayHref}}" style="text-decoration:none;padding:11px 22px;border-radius:12px;border:none;background:linear-gradient(135deg,#FF7A00,#F6B73C);color:#1a130b;font-size:13px;font-weight:900;box-shadow:0 4px 16px rgba(255,122,0,.4)" style-hover="filter:brightness(1.1)">▶ Jouer cette zone</a>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- toast -->
+    <sc-if value="{{toastOn}}" hint-placeholder-val="{{false}}">
+      <div style="position:absolute;top:22px;left:50%;transform:translateX(-50%);background:rgba(10,16,32,.94);border:1px solid rgba(246,183,60,.45);color:#f2e8d5;border-radius:14px;padding:12px 20px;font-size:13px;font-weight:700;box-shadow:0 8px 26px rgba(0,0,0,.5);animation:fadeUp .3s ease;z-index:25">{{toastText}}</div>
+    </sc-if>
+  </div>
+
+  <!-- ═══════ PANNEAUX BAS ═══════ -->
+  <footer style="display:flex;gap:12px;align-items:stretch;padding:10px 18px 14px;z-index:30;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;background:rgba(13,20,36,.92);border:1px solid rgba(246,183,60,.28);border-radius:16px;padding:12px 18px;transition:transform .15s" style-hover="transform:translateY(-2px)">
+      <span style="font-size:24px">🧭</span>
+      <div>
+        <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#fff">{{footTitle}}</div>
+        <div style="font-size:11.5px;font-weight:700;color:#8d9bb5">{{footSub}}</div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:220px;display:flex;align-items:center;gap:14px;background:rgba(13,20,36,.92);border:1px solid rgba(246,183,60,.28);border-radius:16px;padding:12px 18px">
+      <span style="font-size:22px">⭐</span>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#fff">Progression globale</span>
+          <span style="font-size:12.5px;font-weight:800;color:#c9d4e4">{{progLabel}}</span>
+        </div>
+        <div style="height:10px;border-radius:99px;background:rgba(255,255,255,.1);margin-top:6px;overflow:hidden">
+          <div style="{{progBarStyle}}"></div>
+        </div>
+      </div>
+    </div>
+    <button onClick="{{onChest}}" style="display:flex;align-items:center;gap:12px;background:rgba(13,20,36,.92);border:1px solid rgba(246,183,60,.28);border-radius:16px;padding:12px 18px;cursor:pointer;position:relative;transition:transform .15s" style-hover="transform:translateY(-2px);border-color:rgba(246,183,60,.6)">
+      <span style="font-size:24px;display:inline-block;animation:chestBounce 3.4s ease-in-out infinite">🪙</span>
+      <div style="text-align:left">
+        <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#fff">Coffres</div>
+        <div style="font-size:11.5px;font-weight:700;color:#8d9bb5">Récompenses</div>
+      </div>
+      <sc-if value="{{chestBadgeOn}}" hint-placeholder-val="{{true}}">
+        <span style="position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:#e0472e;color:#fff;font-size:11.5px;font-weight:900;display:grid;place-items:center;border:2px solid #0a1020">{{chestCount}}</span>
+      </sc-if>
+    </button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: null}">
+class Component extends DCLogic {
+  state = { view: 'monde', detail: null, toast: '' };
+
+  componentDidMount() {
+    if (window.top === window) {
+      const noop = () => {};
+      for (const k of ['__dcUpdate', '__dcSetProps', '__dcBoot']) {
+        try { Object.defineProperty(window, k, { value: noop, writable: false, configurable: false }); } catch (e) {}
+      }
+    }
+    this.zones = [];
+    const base = location.href.replace(/[#?].*$/, '').replace(/[^/]*$/, '');
+    const loadMod = (name) =>
+      import(base + 'data/' + name)
+        .catch(() => import('./data/' + name))
+        .catch(() => fetch(base + 'data/' + name)
+          .then(r => { if (!r.ok) throw new Error(name + ' : HTTP ' + r.status); return r.text(); })
+          .then(txt => {
+            const exports = {};
+            const src = txt
+              .replace(/export\s+const\s+(\w+)\s*=/g, 'exports.$1 =')
+              .replace(/export\s+function\s+(\w+)/g, 'exports.$1 = function $1');
+            new Function('exports', src)(exports);
+            return exports;
+          }));
+    loadMod('zones_a.js').then(a => loadMod('zones_b.js').then(b => loadMod('zones_c.js').then(c => {
+      this.zones = [].concat(a.ZONES_A, b.ZONES_B, c.ZONES_C);
+      this.forceUpdate();
+    }))).catch(() => {});
+    this._raf = requestAnimationFrame((t) => this.fxLoop(t));
+
+    this._onKey = (e) => { if (e.key === 'Escape') this.setState({ detail: null, view: this.state.detail ? this.state.view : 'monde' }); };
+    window.addEventListener('keydown', this._onKey);
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this._raf);
+    clearInterval(this._foxT);
+    window.removeEventListener('keydown', this._onKey);
+  }
+
+  save() {
+    try { return JSON.parse(localStorage.getItem('roxpy_v1')) || {}; } catch (e) { return {}; }
+  }
+
+  // ═══════ définition des vues ═══════
+  views() {
+    return {
+      monde: {
+        src: 'assets/maps/world-map.png', ratio: 1428 / 842, alt: 'Carte du monde RoxPy', fx: 'gold',
+        nodes: [
+          { id: 1, x: 10.2, y: 35.4 }, { id: 2, x: 19.7, y: 41.2 }, { id: 3, x: 30.7, y: 39.3 }, { id: 4, x: 36.0, y: 43.0 }, { id: 5, x: 41.5, y: 37.4 }, { id: 6, x: 45.0, y: 31.0 }, { id: 7, x: 48.5, y: 26.0 },
+          { id: 8, x: 51.2, y: 30.5 }, { id: 9, x: 58.7, y: 35.6 }, { id: 10, x: 67.4, y: 40.4 }, { id: 11, x: 78.4, y: 42.8 }, { id: 12, x: 84.5, y: 36.5 }, { id: 13, x: 89.5, y: 29.5 }, { id: 14, x: 93.5, y: 37.0 }, { id: 15, x: 90.0, y: 45.0 },
+          { id: 16, x: 6.7, y: 80.6 }, { id: 17, x: 15.8, y: 81.2 }, { id: 18, x: 26.8, y: 78.6 }, { id: 19, x: 34.3, y: 75.1 }, { id: 20, x: 39.5, y: 69.0 }, { id: 21, x: 43.5, y: 62.5 }, { id: 22, x: 47.0, y: 56.0 },
+          { id: 23, x: 52.0, y: 60.5 }, { id: 24, x: 56.5, y: 67.5 }, { id: 25, x: 51.0, y: 74.5 }, { id: 26, x: 56.6, y: 80.4 }, { id: 27, x: 62.0, y: 87.0 }, { id: 28, x: 66.8, y: 77.0 },
+          { id: 29, x: 74.5, y: 71.5 }, { id: 30, x: 79.5, y: 64.5 }, { id: 31, x: 85.0, y: 58.5 }, { id: 32, x: 92.0, y: 57.0 }, { id: 33, x: 96.5, y: 62.5 }, { id: 34, x: 96.0, y: 71.5 }, { id: 35, x: 88.7, y: 77.5 },
+        ],
+        regions: [
+          { key: 'foret', title: 'Forêt enchantée — Les bases', x: 11, y: 11, w: 14, h: 9 },
+          { key: 'montagne', title: 'Montagne enneigée — Défis & logique', x: 63, y: 15, w: 18, h: 9 },
+          { key: 'temple', title: 'Temple lunaire — Réflexion & mémoire', x: 17, y: 56, w: 14, h: 9 },
+          { key: 'village', title: 'Village forestier — Créativité & expression', x: 52, y: 56, w: 15, h: 9 },
+          { key: 'sanctuaire', title: 'Sanctuaire RoxPy — Maîtrise ultime', x: 79, y: 82, w: 17, h: 9 },
+        ],
+      },
+      foret: {
+        src: 'assets/maps/forest.png', ratio: 1672 / 941, alt: 'Forêt enchantée', fx: 'fireflies',
+        region: 'FORÊT ENCHANTÉE',
+        nodes: [
+          { id: 1, x: 22.1, y: 53.3 }, { id: 2, x: 36.4, y: 62.0 }, { id: 3, x: 53.7, y: 61.2 },
+          { id: 4, x: 68.3, y: 61.3 }, { id: 5, x: 75.2, y: 47.9 }, { id: 6, x: 82.2, y: 37.3 }, { id: 7, x: 88.4, y: 26.4 },
+        ],
+        regions: [],
+      },
+      montagne: {
+        src: 'assets/maps/snow-mountain.png', ratio: 1672 / 941, alt: 'Montagne enneigée', fx: 'snow',
+        region: 'MONTAGNE ENNEIGÉE',
+        nodes: [
+          { id: 8, x: 12.4, y: 37.6 }, { id: 9, x: 25.0, y: 44.3 }, { id: 10, x: 33.2, y: 55.2 },
+          { id: 11, x: 40.5, y: 47.5 }, { id: 12, x: 52.9, y: 43.1 }, { id: 13, x: 66.6, y: 50.1 },
+          { id: 14, x: 79.6, y: 57.6 }, { id: 15, x: 89.1, y: 66.5 },
+          { id: -1, x: 71.9, y: 88.2 }, { id: -1, x: 51.7, y: 85.9 },
+        ],
+        regions: [],
+      },
+      temple: {
+        src: 'assets/maps/lunar-temple.png', ratio: 1672 / 941, alt: 'Temple lunaire', fx: 'stars',
+        region: 'TEMPLE LUNAIRE',
+        nodes: [
+          { id: 16, x: 19.0, y: 55.3 }, { id: 17, x: 31.8, y: 69.0 }, { id: 18, x: 50.3, y: 72.2 },
+          { id: 19, x: 60.2, y: 58.7 }, { id: 20, x: 78.7, y: 50.3 }, { id: 21, x: 87.5, y: 62.0 }, { id: 22, x: 92.5, y: 75.0 },
+        ],
+        regions: [],
+      },
+    };
+  }
+
+  goView(v) {
+    this.setState({ view: v, detail: null });
+  }
+  showToast(msg) {
+    this.setState({ toast: msg });
+    if (this._toastT) clearTimeout(this._toastT);
+    this._toastT = setTimeout(() => this.setState({ toast: '' }), 2800);
+  }
+
+  // ═══════ particules ═══════
+  fxLoop(t) {
+    this._raf = requestAnimationFrame((tt) => this.fxLoop(tt));
+    const cv = this._fx;
+    if (!cv) return;
+    const w = cv.clientWidth, h = cv.clientHeight;
+    if (!w) return;
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    const ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+    const mode = this.views()[this.state.view].fx;
+    if (this._fxMode !== mode || !this.ps) {
+      this._fxMode = mode;
+      const n = mode === 'snow' ? 130 : mode === 'stars' ? 110 : 80;
+      this.ps = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h, r: Math.random(), p: Math.random() * 7 }));
+    }
+    for (const p of this.ps) {
+      if (mode === 'snow') {
+        p.y += (0.3 + p.r * 0.7); p.x += Math.sin(t / 900 + p.p) * 0.4;
+        if (p.y > h) { p.y = -4; p.x = Math.random() * w; }
+        ctx.globalAlpha = 0.5 + p.r * 0.5;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(p.x, p.y, 1 + p.r * 2.2, 0, 7); ctx.fill();
+      } else if (mode === 'stars') {
+        const a = 0.25 + Math.abs(Math.sin(t / 700 + p.p)) * 0.75;
+        ctx.globalAlpha = a;
+        ctx.fillStyle = p.r > 0.6 ? '#c7b3ff' : '#9db8ff';
+        ctx.beginPath(); ctx.arc(p.x, p.y, 0.8 + p.r * 1.8, 0, 7); ctx.fill();
+      } else {
+        // lucioles / poussière dorée
+        p.x += Math.sin(t / 1300 + p.p) * 0.35;
+        p.y += Math.cos(t / 1600 + p.p * 2) * 0.3 - 0.06;
+        if (p.y < -4) p.y = h + 4;
+        if (p.x < -4) p.x = w + 4; if (p.x > w + 4) p.x = -4;
+        const a = 0.2 + Math.abs(Math.sin(t / 800 + p.p)) * 0.8;
+        ctx.globalAlpha = a;
+        const gold = mode === 'gold' || p.r > 0.5;
+        ctx.fillStyle = gold ? '#ffd97a' : '#8fd8ff';
+        ctx.shadowColor = gold ? '#ffb84d' : '#5DADE2';
+        ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 1 + p.r * 1.7, 0, 7); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  renderVals() {
+    const save = this.save();
+    const V = this.views()[this.state.view];
+    const xp = save.xp != null ? save.xp : 1250;
+    const level = Math.floor(xp / 400) + 1;
+    const done = (save.badges || [1, 2, 3]).length;
+
+    const vals = {
+      streak: save.streak || 4,
+      level, xp: xp.toLocaleString('fr-FR'),
+      mapRef: (el) => { if (el && el.getAttribute('src') !== V.src) el.setAttribute('src', V.src); },
+      mapAlt: V.alt,
+      inZone: this.state.view !== 'monde',
+      onBackWorld: () => this.goView('monde'),
+      fxRef: (el) => { this._fx = el; },
+      footTitle: this.state.view === 'monde' ? 'Carte du monde' : V.alt,
+      footSub: this.state.view === 'monde' ? 'Ton aventure' : 'Région de ' + V.alt,
+      progLabel: done + ' / 35',
+      progBarStyle: { height: '100%', width: Math.round(done / 35 * 100) + '%', borderRadius: '99px', background: 'linear-gradient(90deg,#73C088,#a8d84f)', boxShadow: '0 0 10px rgba(115,192,136,.7)', transition: 'width .6s ease' },
+      chestBadgeOn: true,
+      chestCount: 2,
+      onChest: () => this.showToast('🪙 Termine toutes les zones d\u2019une région pour ouvrir son coffre !'),
+      toastOn: !!this.state.toast,
+      toastText: this.state.toast,
+      stopProp: (e) => e.stopPropagation(),
+      mapBoxStyle: {
+        position: 'relative',
+        width: 'min(100%, calc((100vh - 200px) * ' + V.ratio + '))',
+        aspectRatio: String(V.ratio),
+        borderRadius: '18px',
+        boxShadow: '0 20px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(246,183,60,.2)',
+        animation: 'zoneIn .45s ease',
+      },
+    };
+
+    // sentier pointillé entre les nouvelles zones (14 → 35, vue monde)
+    vals.trailDots = [];
+    if (this.state.view === 'monde') {
+      const path = V.nodes.filter(n => n.id >= 3).sort((a, b) => a.id - b.id);
+      for (let i = 0; i < path.length - 1; i++) {
+        const a = path[i], b = path[i + 1];
+        const dx = b.x - a.x, dy = (b.y - a.y) * 0.59;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 16) continue; // pas de trait entre régions éloignées
+        const steps = Math.max(2, Math.round(dist / 1.6));
+        for (let s = 1; s < steps; s++) {
+          const t = s / steps;
+          const px = a.x + (b.x - a.x) * t, py = a.y + (b.y - a.y) * t;
+          const dEdge = Math.min(t, 1 - t) * dist;
+          if (dEdge < 2.6) continue; // ne pas coller aux pastilles
+          vals.trailDots.push({ style: {
+            position: 'absolute', left: px + '%', top: py + '%', transform: 'translate(-50%,-50%)',
+            width: '0.45%', aspectRatio: '1', borderRadius: '50%', pointerEvents: 'none', zIndex: 2,
+            background: 'rgba(255,222,150,.85)', boxShadow: '0 0 6px rgba(255,200,100,.8)',
+          } });
+        }
+      }
+    }
+
+    // nodes : statut calculé depuis la sauvegarde
+    const badges = save.badges || [1, 2, 3];
+    const unlocked = Math.max(1, Math.min(35, save.unlocked || 4));
+    const stOf = (id) => id === -1 ? 'locked' : (badges.includes(id) ? 'done' : (id === unlocked ? 'current' : id < unlocked ? 'done' : 'todo'));
+    const cols = { done: '#73C088', current: '#F6B73C', todo: '#5DADE2', locked: '#6b7690' };
+    const bgs = {
+      done: 'radial-gradient(circle at 35% 28%, rgba(255,255,255,.3), transparent 55%), linear-gradient(180deg, #3f7a50, #24512f)',
+      current: 'radial-gradient(circle at 35% 28%, rgba(255,255,255,.35), transparent 55%), linear-gradient(180deg, #d99a2b, #8f5f14)',
+      todo: 'radial-gradient(circle at 35% 28%, rgba(255,255,255,.25), transparent 55%), linear-gradient(180deg, #2b4a68, #16283c)',
+      locked: 'radial-gradient(circle at 35% 28%, rgba(255,255,255,.18), transparent 55%), linear-gradient(180deg, #3a4257, #232a3c)',
+    };
+    vals.nodes = V.nodes.map(n => {
+      const st = stOf(n.id);
+      const size = st === 'current' ? 5.4 : 4.3;
+      return {
+        title: n.id === -1 ? 'Coffre mystérieux' : 'Zone ' + n.id,
+        label: n.id === -1 ? '🎁' : st === 'done' ? '✓' : String(n.id),
+        onClick: () => {
+          if (st === 'locked') { this.showToast('🎁 Termine toutes les zones de la région pour ouvrir ce coffre !'); return; }
+          if (st === 'todo') { this.showToast('🔒 Termine d\u2019abord la zone précédente pour débloquer celle-ci !'); return; }
+          this.setState({ detail: { id: n.id, st } });
+          if (st === 'current' || st === 'done') {
+            this.setState({ foxAnim: 'victoire' });
+            if (this._foxVT) clearTimeout(this._foxVT);
+            this._foxVT = setTimeout(() => this.setState({ foxAnim: 'idle' }), 2100);
+          }
+        },
+        style: {
+          position: 'absolute', left: n.x + '%', top: n.y + '%', transform: 'translate(-50%,-50%)',
+          width: size + '%', aspectRatio: '1', borderRadius: '50%',
+          background: bgs[st], border: 'none', padding: 0, zIndex: 3,
+          boxShadow: 'inset 0 0 0 3px ' + cols[st] + ', inset 0 0 0 4.5px rgba(255,255,255,.35), 0 4px 12px rgba(0,0,0,.5)',
+          color: '#fff', fontWeight: 900, fontSize: st === 'current' ? 'min(2.6vh, 1.35vw)' : 'min(2.1vh, 1.1vw)',
+          fontFamily: "'Baloo 2', cursive", lineHeight: 1,
+          display: 'grid', placeItems: 'center',
+          textShadow: '0 1px 4px rgba(0,0,0,.6)',
+          cursor: st === 'locked' ? 'not-allowed' : 'pointer',
+          transition: 'transform .15s, box-shadow .15s',
+        },
+        hoverStyle: { transform: 'translate(-50%,-50%) scale(1.12)', boxShadow: 'inset 0 0 0 3px ' + cols[st] + ', 0 0 0 3px rgba(255,255,255,.5), 0 0 26px ' + cols[st], zIndex: 5 },
+      };
+    });
+    const cur = V.nodes.find(n => stOf(n.id) === 'current');
+    vals.haloStyle = cur ? {
+      position: 'absolute', left: cur.x + '%', top: cur.y + '%', transform: 'translate(-50%,-50%)',
+      width: '11%', aspectRatio: '1', borderRadius: '50%', pointerEvents: 'none',
+      animation: 'nodePulse 1.8s ease-in-out infinite',
+    } : { display: 'none' };
+
+    // hotspots régions (vue monde)
+    vals.regionSpots = (V.regions || []).map(r => ({
+      title: r.title,
+      onClick: () => {
+        if (r.key === 'village' || r.key === 'sanctuaire') { this.showToast(r.key === 'village' ? '🏘️ Village forestier — zones 23 à 28, sur la carte !' : '🔮 Sanctuaire RoxPy — zones 29 à 35, l\u2019épreuve finale !'); return; }
+        this.goView(r.key);
+      },
+      style: {
+        position: 'absolute', left: r.x + '%', top: r.y + '%', width: r.w + '%', height: r.h + '%',
+        background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', padding: 0,
+        transition: 'outline .15s, background .15s',
+      },
+    }));
+
+    // renard animé (sprites des planches officielles)
+    const stage = Math.max(0, Math.min(2, save.stage || 0));
+    const dir = ['renardeau', 'renard', 'argente'][stage];
+    const anim = this.state.foxAnim === 'victoire' ? 'victoire' : 'idle';
+    const counts = { renardeau: { idle: 6, victoire: 6 }, renard: { idle: 5, victoire: 5 }, argente: { idle: 6, victoire: 6 } };
+    const nF = counts[dir][anim];
+    vals.foxSrc = 'assets/sprites/' + dir + '/' + anim + (((this.state.ft || 0) % nF) + 1) + '.png';
+    const anchorW = { monde: 10, foret: 11, montagne: 11, temple: 10 };
+    const an = cur ? { x: cur.x, y: cur.y, w: anchorW[this.state.view] || 10 } : { x: -20, y: -20, w: 10 };
+    vals.foxSpriteStyle = {
+      position: 'absolute', left: an.x + '%', top: an.y + '%', width: an.w + '%',
+      transform: 'translate(-50%,-92%)', zIndex: 4, pointerEvents: 'none',
+      filter: 'drop-shadow(0 6px 10px rgba(0,0,0,.45)) drop-shadow(0 0 14px rgba(246,183,60,.35))',
+    };
+
+    // détail
+    const d = this.state.detail;
+    vals.detailOn = !!d;
+    if (d) {
+      const z = this.zones.find(zz => zz.id === d.id);
+      const regs = { monde: 'CARTE DU MONDE', foret: 'FORÊT ENCHANTÉE', montagne: 'MONTAGNE ENNEIGÉE', temple: 'TEMPLE LUNAIRE' };
+      const cols2 = { done: '#73C088', current: '#F6B73C', todo: '#5DADE2', locked: '#6b7690' };
+      const glows = { done: 'rgba(115,192,136,.4)', current: 'rgba(246,183,60,.45)', todo: 'rgba(93,173,226,.4)', locked: 'rgba(107,118,144,.3)' };
+      vals.dId = d.id;
+      vals.dPlayHref = 'RoxPy.dc.html#zone-' + d.id;
+      vals.dTitre = z ? z.titre : '…';
+      vals.dIcone = z ? z.icone : '📍';
+      vals.dRegion = V.region || regs[this.state.view];
+      vals.dColor = cols2[d.st];
+      vals.dGlow = glows[d.st];
+      vals.dBg = 'rgba(255,255,255,.06)';
+      vals.dStatus = d.st === 'done' ? '✅ Zone réussie — badge gagné !' : d.st === 'current' ? '⭐ Ta position actuelle — à toi de jouer !' : '🔓 Zone à découvrir';
+      vals.onCloseDetail = () => this.setState({ detail: null });
+    }
+    return vals;
+  }
+}
+</script>
+</body>
+</html>
