@@ -5,23 +5,8 @@
 Tu incarnes un renardeau curieux qui part explorer un monde magique. À chaque zone terminée, tu gagnes des badges, de l'expérience… et ton renard grandit : **Renardeau → Renard → Renard argenté** ✨
 
 
-## 🎬 Bande-annonce
 
-<!-- ══════════════════════════════════════════════════════════════
-     COMMENT AFFICHER LA VIDÉO ICI (lecteur intégré GitHub) :
-     1. Sur github.com, ouvre ce README puis clique sur ✏️ (Edit).
-     2. Fais glisser le fichier RoxPy_trailer_v5.mp4 directement dans
-        la zone de texte, À L'EMPLACEMENT de la ligne ci-dessous.
-     3. GitHub téléverse la vidéo et insère tout seul un lien de la forme
-        https://github.com/user-attachments/assets/xxxxxxxx
-        → il s'affichera automatiquement comme un lecteur vidéo.
-     4. Supprime la ligne "_(Bande-annonce à venir…)_" ci-dessous.
-     ⚠️ Ne colle PAS un chemin local (assets/RoxPy_trailer_v5.mp4) :
-        GitHub n'affiche un lecteur que pour les vidéos téléversées ainsi.
-        Taille max : 100 Mo.
-     ══════════════════════════════════════════════════════════════ -->
 
-_(Bande-annonce à venir — glisse la vidéo ici, voir le commentaire ci-dessus.)_
 
 ## ▶️ Jouer maintenant
 
